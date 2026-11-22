@@ -1,0 +1,44 @@
+{
+  "info": {
+    "name": "SkillJobs API",
+    "description": "Local API collection. Login requests save the returned JWT in the collection variable token.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {"key": "baseUrl", "value": "http://localhost:8080"},
+    {"key": "token", "value": ""},
+    {"key": "jobId", "value": "1"},
+    {"key": "companyId", "value": "1"}
+  ],
+  "item": [
+    {"name": "Authentication", "item": [
+      {"name": "Candidate login", "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\n  \"email\": \"candidate@skilljobs.local\",\n  \"password\": \"Candidate@123\"\n}"}, "url": "{{baseUrl}}/api/auth/login"}, "event": [{"listen": "test", "script": {"exec": ["const body = pm.response.json();", "if (body.token) pm.collectionVariables.set('token', body.token);"]}}]},
+      {"name": "Recruiter login", "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\n  \"email\": \"recruiter@skilljobs.local\",\n  \"password\": \"Recruiter@123\"\n}"}, "url": "{{baseUrl}}/api/auth/login"}, "event": [{"listen": "test", "script": {"exec": ["const body = pm.response.json();", "if (body.token) pm.collectionVariables.set('token', body.token);"]}}]},
+      {"name": "Admin login", "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\n  \"email\": \"admin@skilljobs.local\",\n  \"password\": \"Admin@12345\"\n}"}, "url": "{{baseUrl}}/api/auth/login"}, "event": [{"listen": "test", "script": {"exec": ["const body = pm.response.json();", "if (body.token) pm.collectionVariables.set('token', body.token);"]}}]}
+    ]},
+    {"name": "Public jobs and skills", "item": [
+      {"name": "Search jobs", "request": {"method": "GET", "url": "{{baseUrl}}/api/jobs?q=java&location=Bangalore&page=0&size=10&sort=createdAt,desc"}},
+      {"name": "Get skills", "request": {"method": "GET", "url": "{{baseUrl}}/api/skills"}}
+    ]},
+    {"name": "Candidate", "item": [
+      {"name": "My profile", "request": {"method": "GET", "header": [{"key": "Authorization", "value": "Bearer {{token}}"}], "url": "{{baseUrl}}/api/users/profile"}},
+      {"name": "Recommended jobs", "request": {"method": "GET", "header": [{"key": "Authorization", "value": "Bearer {{token}}"}], "url": "{{baseUrl}}/api/jobs/recommended"}},
+      {"name": "Apply to job", "request": {"method": "POST", "header": [{"key": "Authorization", "value": "Bearer {{token}}"}, {"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\n  \"coverLetter\": \"I am interested in this role.\"\n}"}, "url": "{{baseUrl}}/api/applications/{{jobId}}"}},
+      {"name": "My applications", "request": {"method": "GET", "header": [{"key": "Authorization", "value": "Bearer {{token}}"}], "url": "{{baseUrl}}/api/applications/my"}},
+      {"name": "Save job", "request": {"method": "POST", "header": [{"key": "Authorization", "value": "Bearer {{token}}"}], "url": "{{baseUrl}}/api/saved-jobs/{{jobId}}"}},
+      {"name": "Saved jobs", "request": {"method": "GET", "header": [{"key": "Authorization", "value": "Bearer {{token}}"}], "url": "{{baseUrl}}/api/saved-jobs"}}
+    ]},
+    {"name": "Recruiter", "item": [
+      {"name": "My companies", "request": {"method": "GET", "header": [{"key": "Authorization", "value": "Bearer {{token}}"}], "url": "{{baseUrl}}/api/companies/mine"}},
+      {"name": "Recruiter dashboard", "request": {"method": "GET", "header": [{"key": "Authorization", "value": "Bearer {{token}}"}], "url": "{{baseUrl}}/api/recruiter/dashboard"}},
+      {"name": "Applicants", "request": {"method": "GET", "header": [{"key": "Authorization", "value": "Bearer {{token}}"}], "url": "{{baseUrl}}/api/recruiter/applications"}}
+    ]},
+    {"name": "Admin", "item": [
+      {"name": "Admin dashboard", "request": {"method": "GET", "header": [{"key": "Authorization", "value": "Bearer {{token}}"}], "url": "{{baseUrl}}/api/admin/dashboard"}},
+      {"name": "Users", "request": {"method": "GET", "header": [{"key": "Authorization", "value": "Bearer {{token}}"}], "url": "{{baseUrl}}/api/admin/users"}},
+      {"name": "All jobs", "request": {"method": "GET", "header": [{"key": "Authorization", "value": "Bearer {{token}}"}], "url": "{{baseUrl}}/api/admin/jobs"}},
+      {"name": "All companies", "request": {"method": "GET", "header": [{"key": "Authorization", "value": "Bearer {{token}}"}], "url": "{{baseUrl}}/api/admin/companies"}},
+      {"name": "All applications", "request": {"method": "GET", "header": [{"key": "Authorization", "value": "Bearer {{token}}"}], "url": "{{baseUrl}}/api/admin/applications"}}
+    ]}
+  ]
+}

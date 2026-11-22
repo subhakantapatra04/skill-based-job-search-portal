@@ -1,0 +1,17 @@
+target/
+.env
+.env.*
+!.env.example
+uploads/
+*.log
+.idea/
+*.iml
+.classpath
+.project
+.settings/
+*.pdf
+*.doc
+*.docx
+.DS_Store
+Thumbs.db
+application-local.properties

@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width,initial-scale=1">
+	<title>Dashboard | SkillJobs</title>
+	<link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body class="app-body">
+	<header class="topbar"><a class="brand" href="/">Skill<span>Jobs</span></a>
+		<div class="top-actions"><span id="whoami"></span><button class="btn btn-outline" id="logoutBtn">Logout</button>
+		</div>
+	</header>
+	<div class="dashboard-layout">
+		<aside class="sidebar">
+			<div class="side-user">
+				<div class="avatar" id="avatar">U</div><strong id="sideName">User</strong><small
+					id="sideRole">ROLE</small>
+			</div>
+			<nav id="nav"></nav>
+		</aside>
+		<main class="main-content">
+			<div class="page-heading">
+				<div>
+					<p class="eyebrow">WORKSPACE</p>
+					<h1 id="pageTitle">Dashboard</h1>
+					<p id="pageSubtitle">Manage your job search workspace.</p>
+				</div>
+			</div>
+			<div id="notice" class="notice hidden"></div>
+			<section id="view"></section>
+		</main>
+	</div>
+	<div id="modalRoot"></div>
+	<script src="/js/app.js"></script>
+</body>
+
+</html>

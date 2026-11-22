@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width,initial-scale=1">
+	<title>Create account | SkillJobs</title>
+	<link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body class="auth-body"><a class="brand auth-brand" href="/">Skill<span>Jobs</span></a>
+	<main class="auth-card">
+		<p class="eyebrow">GET STARTED</p>
+		<h1>Create your account</h1>
+		<p class="muted">Choose how you want to use SkillJobs.</p>
+		<form id="registerForm"><label>Full name<input name="fullName" required
+					maxlength="100"></label><label>Email<input type="email" name="email"
+					required></label><label>Password<input type="password" name="password" minlength="8"
+					required></label><label>Account type<select name="role">
+					<option value="CANDIDATE">Candidate</option>
+					<option value="RECRUITER">Recruiter</option>
+				</select></label><button class="btn btn-primary full" type="submit">Create account</button>
+			<p id="error" class="error"></p>
+		</form>
+		<p class="auth-foot">Already registered? <a href="/login.html">Sign in</a></p>
+	</main>
+	<script src="/js/app.js"></script>
+</body>
+
+</html>

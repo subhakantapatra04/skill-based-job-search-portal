@@ -1,0 +1,14 @@
+
+.git
+.idea
+.vscode
+target/
+uploads/
+.env
+.env.*
+!.env.example
+*.log
+*.iml
+.DS_Store
+Thumbs.db
+application-local.properties

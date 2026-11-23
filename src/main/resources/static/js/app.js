@@ -29,11 +29,12 @@ async function api(path, opts = {}) {
         );
     return data;
 }
+
 async function openProtectedResume(url) {
     const newTab = window.open("about:blank", "_blank");
 
     if (!newTab) {
-        notice("Please allow pop-ups to view the resume.", "error");
+        notice("Please allow pop-ups to preview the resume.", "error");
         return;
     }
 
@@ -50,17 +51,131 @@ async function openProtectedResume(url) {
         }
 
         const blob = await response.blob();
+        const disposition = response.headers.get("Content-Disposition") || "";
+
+        let filename = "resume";
+
+        const utf8Match = disposition.match(/filename\*=UTF-8''([^;]+)/i);
+        const normalMatch = disposition.match(/filename="?([^";]+)"?/i);
+
+        if (utf8Match) {
+            filename = decodeURIComponent(utf8Match[1]);
+        } else if (normalMatch) {
+            filename = normalMatch[1];
+        }
+
+        const fileType = blob.type.toLowerCase();
+        const lowerName = filename.toLowerCase();
+
+        // PDF preview
+        if (fileType.includes("pdf") || lowerName.endsWith(".pdf")) {
+            const fileUrl = URL.createObjectURL(blob);
+            newTab.location.href = fileUrl;
+
+            setTimeout(() => URL.revokeObjectURL(fileUrl), 300000);
+            return;
+        }
+
+        // DOCX preview
+        if (
+            fileType.includes("wordprocessingml") ||
+            lowerName.endsWith(".docx")
+        ) {
+            const previewDoc = newTab.document;
+
+            previewDoc.open();
+            previewDoc.write(`<!DOCTYPE html>
+                <html>
+                <head>
+                    <title>Resume Preview</title>
+                    <meta charset="UTF-8">
+                    <meta name="viewport" content="width=device-width, initial-scale=1">
+                    <style>
+                        body {
+                            margin: 0;
+                            font-family: Arial, sans-serif;
+                            background: #f1f3f5;
+                        }
+                        header {
+                            padding: 15px 24px;
+                            background: #ffffff;
+                            border-bottom: 1px solid #ddd;
+                            font-weight: bold;
+                        }
+                        #docx-container {
+                            padding: 25px 10px;
+                            overflow: auto;
+                        }
+                    </style>
+                </head>
+                <body>
+                    <header>Resume Preview</header>
+                    <main id="docx-container">Loading resume...</main>
+                </body>
+                </html>`);
+            previewDoc.close();
+
+            function loadScript(src) {
+                return new Promise((resolve, reject) => {
+                    const script = previewDoc.createElement("script");
+                    script.src = src;
+                    script.onload = resolve;
+                    script.onerror = () => reject(
+                        new Error("Unable to load DOCX preview library.")
+                    );
+                    previewDoc.head.appendChild(script);
+                });
+            }
+
+            await loadScript(
+                "https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"
+            );
+
+            await loadScript(
+                "https://cdn.jsdelivr.net/npm/docx-preview@0.4.1/dist/docx-preview.min.js"
+            );
+
+            if (!newTab.docx || !newTab.docx.renderAsync) {
+                throw new Error("DOCX preview library is unavailable.");
+            }
+
+            await newTab.docx.renderAsync(
+                blob,
+                previewDoc.getElementById("docx-container"),
+                previewDoc.head,
+                {
+                    renderAltChunks: false
+                }
+            );
+
+            return;
+        }
+
+        // Download unsupported document types
+        newTab.close();
+
         const fileUrl = URL.createObjectURL(blob);
+        const link = document.createElement("a");
 
-        newTab.location.href = fileUrl;
+        link.href = fileUrl;
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
 
-        setTimeout(() => URL.revokeObjectURL(fileUrl), 300000);
+        setTimeout(() => URL.revokeObjectURL(fileUrl), 60000);
+
+        notice("Resume downloaded successfully.");
 
     } catch (error) {
-        newTab.close();
+        if (!newTab.closed) {
+            newTab.close();
+        }
+
         notice(error.message, "error");
     }
 }
+
 function showError(el, msg) {
     if (el) {
         el.textContent = msg;
@@ -262,6 +377,36 @@ async function renderCandidate(section) {
             api("/saved-jobs?page=0&size=5"),
         ]);
         view.innerHTML = `<div class="metrics">${metric("Profile skills", profile.skills.length, "Skills in your profile")}${metric("Applications", apps.totalElements ?? apps.content?.length ?? 0, "Submitted applications")}${metric("Recommended jobs", recommended.length, "Based on your skills")}${metric("Saved jobs", saved.totalElements ?? 0, "Keep opportunities handy")}</div>${card("Recommended for you", "Jobs ranked by your skill match", jobCards(recommended.slice(0, 4)))}${card("Recent applications", "Latest application activity", applicationTable(apps.content || []))}`;
+// Attach Apply button handlers in Overview
+view.querySelectorAll("[data-apply]").forEach((b) =>
+    (b.onclick = async () => {
+        const coverLetter = prompt("Optional cover letter:") || "";
+
+        try {
+            await api("/applications/" + b.dataset.apply, {
+                method: "POST",
+                body: JSON.stringify({ coverLetter }),
+            });
+            notice("Application submitted successfully");
+        } catch (e) {
+            notice(e.message, "error");
+        }
+    }),
+);
+
+// Attach Save button handlers in Overview
+view.querySelectorAll("[data-save]").forEach((b) =>
+    (b.onclick = async () => {
+        try {
+            await api("/saved-jobs/" + b.dataset.save, {
+                method: "POST",
+            });
+            notice("Job saved");
+        } catch (e) {
+            notice(e.message, "error");
+        }
+    }),
+);
         view.querySelectorAll("[data-withdraw]").forEach(
             (b) =>
             (b.onclick = async () => {

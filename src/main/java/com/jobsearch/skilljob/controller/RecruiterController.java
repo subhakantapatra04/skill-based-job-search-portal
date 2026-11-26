@@ -45,16 +45,30 @@ public class RecruiterController {
 				apps.findByJobId(j.getId(), org.springframework.data.domain.Pageable.unpaged()).getTotalElements()))
 				.toList();
 	}
+@GetMapping("/applications")
+public List<Map<String, Object>> applications(Authentication a) {
+    return apps.findRecruiterApplications(user(a).getId())
+            .stream()
+            .map(x -> Map.<String, Object>ofEntries(
+                    Map.entry("id", x.getId()),
+                    Map.entry("candidateId", x.getCandidate().getId()),
+                    Map.entry("candidate", x.getCandidate().getFullName()),
+                    Map.entry("email", x.getCandidate().getEmail()),
+                    Map.entry("resumeUrl",
+                            x.getCandidate().getResumeUrl() == null
+                                    ? "" : x.getCandidate().getResumeUrl()),
+                    Map.entry("jobId", x.getJob().getId()),
+                    Map.entry("jobTitle", x.getJob().getTitle()),
+                    Map.entry("company", x.getJob().getCompany().getName()),
+                    Map.entry("status", x.getStatus().name()),
+                    Map.entry("appliedAt", String.valueOf(x.getCreatedAt())),
+                    Map.entry("coverLetter",
+                            x.getCoverLetter() == null
+                                    ? "" : x.getCoverLetter())
+            ))
+            .toList();
+}
 
-	@GetMapping("/applications")
-	public List<Map<String, Object>> applications(Authentication a) {
-		return apps.findRecruiterApplications(user(a).getId()).stream().map(x -> Map.<String, Object>of("id", x.getId(),
-				"candidate", x.getCandidate().getFullName(), "email", x.getCandidate().getEmail(), "resumeUrl",
-				x.getCandidate().getResumeUrl() == null ? "" : x.getCandidate().getResumeUrl(), "jobId",
-				x.getJob().getId(), "jobTitle", x.getJob().getTitle(), "company", x.getJob().getCompany().getName(),
-				"status", x.getStatus().name(), "appliedAt", String.valueOf(x.getCreatedAt()), "coverLetter",
-				x.getCoverLetter() == null ? "" : x.getCoverLetter())).toList();
-	}
 
 	private AppUser user(Authentication a) {
 		return users.findByEmail(a.getName()).orElseThrow(() -> new ResourceNotFoundException("User not found"));

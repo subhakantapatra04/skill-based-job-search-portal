@@ -27,4 +27,4 @@ USER 10001:10001
 
 EXPOSE 8080
 
-ENTRYPOINT ["java", "-Xms128m", "-Xmx512m", "-jar", "/app/app.jar"]
+ENTRYPOINT ["java", "-Xms64m", "-Xmx320m", "-jar", "/app/app.jar"]

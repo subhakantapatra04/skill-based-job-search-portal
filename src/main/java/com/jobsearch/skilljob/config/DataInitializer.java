@@ -18,10 +18,24 @@ public class DataInitializer {
 			JobRepository jobs, PasswordEncoder encoder,
 			@Value("${app.seed.admin-email:admin@skilljobs.local}") String adminEmail,
 			@Value("${app.seed.admin-password:Admin@12345}") String adminPassword,
-			@Value("${app.seed.enabled:true}") boolean enabled) {
-		return args -> {
-			if (!enabled)
-				return;
+			@Value("${app.seed.enabled:true}") boolean enabled,
+@Value("${app.admin.provisioning-enabled:false}") boolean provisionAdmin) {
+
+    return args -> {
+
+        // Create a separate production administrator when requested.
+        if (provisionAdmin && users.findByEmail(adminEmail).isEmpty()) {
+            users.save(new AppUser(
+                    "Portal Administrator",
+                    adminEmail,
+                    encoder.encode(adminPassword),
+                    RoleType.ADMIN
+            ));
+        }
+
+        // Demo data is controlled independently.
+        if (!enabled)
+            return;
 			if (users.findByEmail(adminEmail).isEmpty())
 				users.save(
 						new AppUser("Portal Administrator", adminEmail, encoder.encode(adminPassword), RoleType.ADMIN));

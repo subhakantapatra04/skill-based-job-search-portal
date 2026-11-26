@@ -52,6 +52,10 @@ services:
       UPLOAD_DIR: /app/uploads
       MAIL_ENABLED: "false"
 
+      RESUME_STORAGE: ${RESUME_STORAGE:-local}
+      CLOUDINARY_CLOUD_NAME: ${CLOUDINARY_CLOUD_NAME:-}
+      CLOUDINARY_API_KEY: ${CLOUDINARY_API_KEY:-}
+      CLOUDINARY_API_SECRET: ${CLOUDINARY_API_SECRET:-}
     volumes:
       - resume_uploads:/app/uploads
 

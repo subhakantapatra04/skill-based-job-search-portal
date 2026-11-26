@@ -491,8 +491,14 @@ view.querySelectorAll("[data-save]").forEach((b) =>
         const resumeButton = document.getElementById("viewResumeBtn");
 
         if (resumeButton) {
-            resumeButton.onclick = () => openProtectedResume(p.resumeUrl);
-        }
+    resumeButton.onclick = () => {
+        const candidateId = user().id;
+
+        openProtectedResume(
+            `/api/users/resume/${candidateId}`
+        );
+    };
+}
         return;
     }
     if (section === "applications") {
@@ -739,7 +745,7 @@ async function renderRecruiter(section) {
             a.length
                 ? `<div class="table-wrap"><table><thead><tr><th>Candidate</th><th>Job</th><th>Applied</th><th>Resume</th><th>Status</th><th>Update</th></tr></thead><tbody>${a.map((x) => `<tr><td><b>${esc(x.candidate)}</b><small>${esc(x.email)}</small></td><td>${esc(x.jobTitle)}</td><td>${esc((x.appliedAt || "").slice(0, 10))}</td><td>${x.resumeUrl ? `<button type="button"
 			        class="btn btn-small btn-outline"
-			        data-resume-url="${esc(x.resumeUrl)}">
+			        data-candidate-id="${x.candidateId}">
 			    View resume
 			</button>` : "—"}</td><td>${statusPill(x.status)}</td><td><select data-status="${x.id}">${["APPLIED", "UNDER_REVIEW", "SHORTLISTED", "REJECTED", "HIRED"].map((s) => `<option ${s === x.status ? "selected" : ""}>${s}</option>`).join("")}</select><button class="btn btn-small btn-primary" data-update="${x.id}">Save</button></td></tr>`).join("")}</tbody></table></div>`
                 : empty("No applications received"),
@@ -768,11 +774,15 @@ async function renderRecruiter(section) {
         });
 
         // View candidate resume using JWT
-        view.querySelectorAll("[data-resume-url]").forEach(button => {
-            button.onclick = () => {
-                openProtectedResume(button.dataset.resumeUrl);
-            };
-        });
+        view.querySelectorAll("[data-candidate-id]").forEach(button => {
+    button.onclick = () => {
+        const candidateId = button.dataset.candidateId;
+
+        openProtectedResume(
+            `/api/users/resume/${candidateId}`
+        );
+    };
+});
 
         return;
     }
